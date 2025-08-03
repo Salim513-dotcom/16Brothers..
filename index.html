@@ -46,6 +46,17 @@
             opacity: 0.9;
         }
 
+        .login-notice {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            font-weight: 500;
+            border-radius: 10px;
+            margin: 20px 30px;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+        }
+
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -128,17 +139,17 @@
         }
 
         .member-image {
-           width: 300px;
-            height: 300px;
+           width: 280px;
+            height: 280px;
             border-radius: 50%;
             background: linear-gradient(135deg, #74b9ff, #0984e3);
-            
+            display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-           
-            
-            margin: 0 auto;
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px auto;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -411,12 +422,12 @@
             height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, #74b9ff, #0984e3);
-            
+            display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-           
-            
+            font-size: 1.2rem;
+            font-weight: bold;
             margin: 0 auto;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -427,6 +438,11 @@
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
+        }
+
+        .hidden-financial {
+            color: #999;
+            font-style: italic;
         }
 
         @media (max-width: 768px) {
@@ -459,25 +475,31 @@
             <p>Financial Overview </p>
         </div>
 
-        <div class="summary-cards">
+        <!-- Login Notice for non-logged in users -->
+        <div class="login-notice" id="loginNotice">
+            🔒 Login required to view financial details. Only member names and photos are visible.
+        </div>
+
+        <div class="summary-cards" id="summaryCards">
             <div class="summary-card deposits">
                 <h3>Total Deposits</h3>
-                <div class="amount" id="totalDeposits">Rs. 0.00</div>
+                <div class="amount" id="totalDeposits">Login Required</div>
             </div>
             <div class="summary-card loans">
                 <h3>Total Loans</h3>
-                <div class="amount" id="totalLoans">Rs. 0.00</div>
+                <div class="amount" id="totalLoans">Login Required</div>
             </div>
             <div class="summary-card net">
                 <h3>Net Total</h3>
-                <div class="amount" id="netTotal">Rs. 0.00</div>
+                <div class="amount" id="netTotal">Login Required</div>
             </div>
-            
         </div>
 
         <div style="text-align: center; margin-bottom: 20px;">
+            <button class="add-member-btn" id="loginBtn" onclick="showLogin()" style="background: linear-gradient(135deg, #3498db, #2980b9);">🔐 Login to View Finances</button>
+            <button class="add-member-btn" id="logoutBtn" onclick="logout()" style="display: none; background: linear-gradient(135deg, #e74c3c, #c0392b);">🚪 Logout</button>
             <button class="add-member-btn" id="addMemberBtn" onclick="openModal()" style="display: none;">+ Add New Brother</button>
-            <button class="add-member-btn" id="adminBtn" onclick="showAdminLogin()">Admin Access</button>
+            <button class="add-member-btn" id="adminBtn" onclick="showAdminLogin()" style="display: none;">Admin Access</button>
             <button class="add-member-btn" id="lockBtn" onclick="lockAdmin()" style="display: none; background: linear-gradient(135deg, #e74c3c, #c0392b);">🔒 Lock Admin</button>
             <button class="add-member-btn" id="saveBtn" onclick="saveData()" style="display: none; background: linear-gradient(135deg, #f39c12, #e67e22);">💾 Save Data</button>
             <button class="add-member-btn" id="toggleViewBtn" onclick="toggleView()" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📊 Table View</button>
@@ -515,15 +537,38 @@
                             <tr>
                                 <td style="text-align: center;">Total</td>
                                 <td style="text-align: center;">👥</td>
-                                <td id="totalMembersTable">0 Brothers</td>
-                                <td style="text-align: right; color: #27ae60;" id="totalDepositsTable">Rs. 0.00</td>
-                                <td style="text-align: right; color: #e74c3c;" id="totalLoansTable">Rs. 0.00</td>
-                                <td style="text-align: right; color: #3498db; font-size: 1.1rem;" id="netTotalTable">Rs. 0.00</td>
+                                <td id="totalMembersTable">16 Brothers</td>
+                                <td style="text-align: right; color: #27ae60;" id="totalDepositsTable">Login Required</td>
+                                <td style="text-align: right; color: #e74c3c;" id="totalLoansTable">Login Required</td>
+                                <td style="text-align: right; color: #3498db; font-size: 1.1rem;" id="netTotalTable">Login Required</td>
                                 <td id="actionsFooter" style="display: none;"></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>🔐 Login to View Financial Details</h2>
+            <p style="color: #666; margin-bottom: 20px;">Enter your credentials to access financial information:</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="userId">User ID:</label>
+                    <input type="text" id="userId" required placeholder="Enter your ID">
+                </div>
+                <div class="form-group">
+                    <label for="userPassword">Password:</label>
+                    <input type="password" id="userPassword" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            <div id="loginError" style="color: #e74c3c; margin-top: 10px; display: none;">
+                Invalid credentials. Please try again.
             </div>
         </div>
     </div>
@@ -582,8 +627,49 @@
         let members = [];
         let editingIndex = -1;
         let adminMode = false;
-        let currentView = 'cards'; // 'cards' or 'table'
+        let userLoggedIn = false;
+        let currentView = 'cards';
         const ADMIN_CODE = "Salim333";
+        const USER_ID = "Jaganath";
+        const USER_PASSWORD = "9842660334";
+
+        function showLogin() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('userId').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        function login() {
+            userLoggedIn = true;
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+            document.getElementById('adminBtn').style.display = 'inline-block';
+            document.getElementById('loginNotice').style.display = 'none';
+            
+            renderMembers();
+            updateSummary();
+            closeLoginModal();
+        }
+
+        function logout() {
+            userLoggedIn = false;
+            adminMode = false;
+            document.getElementById('loginBtn').style.display = 'inline-block';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.getElementById('adminBtn').style.display = 'none';
+            document.getElementById('addMemberBtn').style.display = 'none';
+            document.getElementById('lockBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('loginNotice').style.display = 'block';
+            
+            renderMembers();
+            updateSummary();
+        }
 
         function openModal(index = -1) {
             if (!adminMode) {
@@ -603,7 +689,7 @@
                 document.getElementById('imageUrl').value = member.imageUrl || '';
                 document.getElementById('deposit').value = member.deposit;
                 document.getElementById('loan').value = member.loan;
-                document.getElementById('imageFile').value = ''; // Clear file input
+                document.getElementById('imageFile').value = '';
             } else {
                 title.textContent = 'Add New Brother';
                 form.reset();
@@ -614,7 +700,7 @@
 
         function closeModal() {
             document.getElementById('memberModal').style.display = 'none';
-            document.getElementById('imageFile').value = ''; // Clear file input
+            document.getElementById('imageFile').value = '';
             editingIndex = -1;
         }
 
@@ -648,7 +734,7 @@
             document.getElementById('lockBtn').style.display = 'inline-block';
             document.getElementById('saveBtn').style.display = 'inline-block';
             
-            renderMembers(); // Re-render to show admin buttons
+            renderMembers();
             closeAdminModal();
         }
 
@@ -659,7 +745,7 @@
             document.getElementById('lockBtn').style.display = 'none';
             document.getElementById('saveBtn').style.display = 'none';
             
-            renderMembers(); // Re-render to hide admin buttons
+            renderMembers();
         }
 
         function renderMembers() {
@@ -679,28 +765,45 @@
                 const card = document.createElement('div');
                 card.className = 'member-card';
                 
+                const financialContent = userLoggedIn ? `
+                    <div class="financial-row">
+                        <span class="financial-label">Deposits:</span>
+                        <span class="financial-value deposit">Rs. ${member.deposit.toFixed(2)}</span>
+                    </div>
+                    <div class="financial-row">
+                        <span class="financial-label">Loans:</span>
+                        <span class="financial-value loan">Rs. ${member.loan.toFixed(2)}</span>
+                    </div>
+                    <div class="financial-row">
+                        <span class="financial-label">Net Total:</span>
+                        <span class="financial-value net-total">Rs. ${netTotal.toFixed(2)}</span>
+                    </div>
+                ` : `
+                    <div class="financial-row">
+                        <span class="financial-label">Deposits:</span>
+                        <span class="financial-value hidden-financial">Login to view</span>
+                    </div>
+                    <div class="financial-row">
+                        <span class="financial-label">Loans:</span>
+                        <span class="financial-value hidden-financial">Login to view</span>
+                    </div>
+                    <div class="financial-row">
+                        <span class="financial-label">Net Total:</span>
+                        <span class="financial-value hidden-financial">Login to view</span>
+                    </div>
+                `;
+                
                 card.innerHTML = `
                     <div class="member-image">
                         ${member.imageUrl ? 
-                            `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\"font-size: 3rem; font-weight: bold;\">${member.name.charAt(0).toUpperCase()}</div>` :
-                            `<div style="font-size: 3rem; font-weight: bold;">${member.name.charAt(0).toUpperCase()}</div>`
+                            `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='${member.name.charAt(0).toUpperCase()}'" />` :
+                            member.name.charAt(0).toUpperCase()
                         }
                     </div>
                     <div class="member-info">
                         <div class="member-name">${member.name}</div>
                         <div class="financial-info">
-                            <div class="financial-row">
-                                <span class="financial-label">Deposits:</span>
-                                <span class="financial-value deposit">Rs. ${member.deposit.toFixed(2)}</span>
-                            </div>
-                            <div class="financial-row">
-                                <span class="financial-label">Loans:</span>
-                                <span class="financial-value loan">Rs. ${member.loan.toFixed(2)}</span>
-                            </div>
-                            <div class="financial-row">
-                                <span class="financial-label">Net Total:</span>
-                                <span class="financial-value net-total">Rs. ${netTotal.toFixed(2)}</span>
-                            </div>
+                            ${financialContent}
                         </div>
                         <div class="actions" style="display: ${adminMode ? 'block' : 'none'};">
                             <button class="edit-btn" onclick="openModal(${index})">Edit</button>
@@ -718,7 +821,6 @@
             const actionsHeader = document.getElementById('actionsHeader');
             const actionsFooter = document.getElementById('actionsFooter');
             
-            // Show/hide actions column
             actionsHeader.style.display = adminMode ? 'table-cell' : 'none';
             actionsFooter.style.display = adminMode ? 'table-cell' : 'none';
             
@@ -728,21 +830,24 @@
                 const netTotal = member.deposit - member.loan;
                 const row = document.createElement('tr');
                 
+                const depositsDisplay = userLoggedIn ? `Rs. ${member.deposit.toFixed(2)}` : 'Login required';
+                const loansDisplay = userLoggedIn ? `Rs. ${member.loan.toFixed(2)}` : 'Login required';
+                const netDisplay = userLoggedIn ? `Rs. ${netTotal.toFixed(2)}` : 'Login required';
+                
                 row.innerHTML = `
                     <td style="text-align: center; font-weight: bold; color: #666;">${index + 1}</td>
                     <td style="text-align: center;">
                         <div class="table-image">
                             ${member.imageUrl ? 
-                                `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='${member.name.charAt(0).toUpperCase()}` :
+                                `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='${member.name.charAt(0).toUpperCase()}'" />` :
                                 member.name.charAt(0).toUpperCase()
                             }
                         </div>
                     </td>
                     <td style="font-weight: 500; color: #2c3e50;">${member.name}</td>
-                    <td style="font-weight: 500; color: #2c3e50;">${member.name}</td>
-                    <td style="text-align: right; color: #27ae60; font-weight: bold;">Rs. ${member.deposit}</td>
-                    <td style="text-align: right; color: #e74c3c; font-weight: bold;">Rs. ${member.loan}</td>
-                    <td style="text-align: right; color: ${netTotal >= 0 ? '#27ae60' : '#e74c3c'}; font-weight: bold;">Rs. ${netTotal}</td>
+                    <td style="text-align: right; color: ${userLoggedIn ? '#27ae60' : '#999'}; font-weight: bold;">${depositsDisplay}</td>
+                    <td style="text-align: right; color: ${userLoggedIn ? '#e74c3c' : '#999'}; font-weight: bold;">${loansDisplay}</td>
+                    <td style="text-align: right; color: ${userLoggedIn ? (netTotal >= 0 ? '#27ae60' : '#e74c3c') : '#999'}; font-weight: bold;">${netDisplay}</td>
                     <td style="text-align: center; display: ${adminMode ? 'table-cell' : 'none'};">
                         <button class="edit-btn" onclick="openModal(${index})" style="margin-right: 5px; padding: 5px 10px; font-size: 0.8rem;">Edit</button>
                         <button class="delete-btn" onclick="deleteMember(${index})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
@@ -761,9 +866,16 @@
             const netTotal = totalDeposits - totalLoans;
 
             document.getElementById('totalMembersTable').textContent = `${members.length} Brothers`;
-            document.getElementById('totalDepositsTable').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
-            document.getElementById('totalLoansTable').textContent = `Rs. ${totalLoans.toFixed(2)}`;
-            document.getElementById('netTotalTable').textContent = `Rs. ${netTotal.toFixed(2)}`;
+            
+            if (userLoggedIn) {
+                document.getElementById('totalDepositsTable').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
+                document.getElementById('totalLoansTable').textContent = `Rs. ${totalLoans.toFixed(2)}`;
+                document.getElementById('netTotalTable').textContent = `Rs. ${netTotal.toFixed(2)}`;
+            } else {
+                document.getElementById('totalDepositsTable').textContent = 'Login Required';
+                document.getElementById('totalLoansTable').textContent = 'Login Required';
+                document.getElementById('netTotalTable').textContent = 'Login Required';
+            }
         }
 
         function toggleView() {
@@ -791,10 +903,15 @@
             const totalLoans = members.reduce((sum, member) => sum + member.loan, 0);
             const netTotal = totalDeposits - totalLoans;
 
-            document.getElementById('totalDeposits').textContent = `Rs. ${totalDeposits}`;
-            document.getElementById('totalLoans').textContent = `Rs. ${totalLoans}`;
-            document.getElementById('netTotal').textContent = `Rs. ${netTotal}`;
-            document.getElementById('memberCount').textContent = members.length;
+            if (userLoggedIn) {
+                document.getElementById('totalDeposits').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
+                document.getElementById('totalLoans').textContent = `Rs. ${totalLoans.toFixed(2)}`;
+                document.getElementById('netTotal').textContent = `Rs. ${netTotal.toFixed(2)}`;
+            } else {
+                document.getElementById('totalDeposits').textContent = 'Login Required';
+                document.getElementById('totalLoans').textContent = 'Login Required';
+                document.getElementById('netTotal').textContent = 'Login Required';
+            }
         }
 
         function saveData() {
@@ -827,7 +944,6 @@
             alert('Portfolio data saved successfully!');
         }
 
-        // Helper function to convert file to base64
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -836,6 +952,24 @@
                 reader.readAsDataURL(file);
             });
         }
+
+        // User login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const enteredId = document.getElementById('userId').value;
+            const enteredPassword = document.getElementById('userPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (enteredId === USER_ID && enteredPassword === USER_PASSWORD) {
+                login();
+                errorDiv.style.display = 'none';
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('userId').value = '';
+                document.getElementById('userPassword').value = '';
+            }
+        });
 
         // Form submission with image handling
         document.getElementById('memberForm').addEventListener('submit', async function(e) {
@@ -849,7 +983,6 @@
             let imageUrl = document.getElementById('imageUrl').value;
             const imageFile = document.getElementById('imageFile').files[0];
             
-            // If user uploaded a file, convert it to base64
             if (imageFile) {
                 try {
                     imageUrl = await fileToBase64(imageFile);
@@ -897,6 +1030,7 @@
         window.onclick = function(event) {
             const memberModal = document.getElementById('memberModal');
             const adminModal = document.getElementById('adminModal');
+            const loginModal = document.getElementById('loginModal');
             
             if (event.target === memberModal) {
                 closeModal();
@@ -904,17 +1038,21 @@
             if (event.target === adminModal) {
                 closeAdminModal();
             }
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
         }
 
-                members = [
-            { name: "Moti Bhattarai", imageUrl: "moti.jpg", deposit: 0, loan:355505  },
-            { name: "Anil Bhattarai", imageUrl: "anil.jpg", deposit: 75000, loan: 333340},
+        // Initialize members data
+        members = [
+            { name: "Moti Bhattarai", imageUrl: "moti.jpg", deposit: 0, loan: 355505 },
+            { name: "Anil Bhattarai", imageUrl: "anil.jpg", deposit: 75000, loan: 333340 },
             { name: "Laxman Bhattarai", imageUrl: "laxman.jpg", deposit: 30000, loan: 459841 },
             { name: "Bal Krishna Bhattarai", imageUrl: "bal krishna.jpg", deposit: 50000, loan: 422365 },
             { name: "Sujan Bhattarai", imageUrl: "sujan.jpg", deposit: 75000, loan: 495129 },
-            { name: "Tanka Bhattarai", imageUrl: "tanka.jpg", deposit: 30000, loan: 148800},
-            { name: "Dr.Nirajan Bhattarai", imageUrl: "nirajan.jpg", deposit: 75000, loan:222000  },
-            { name: "Nagendra Bhattarai", imageUrl: "nagendra.jpg", deposit: 50000, loan: 247826},
+            { name: "Tanka Bhattarai", imageUrl: "tanka.jpg", deposit: 30000, loan: 148800 },
+            { name: "Dr.Nirajan Bhattarai", imageUrl: "nirajan.jpg", deposit: 75000, loan: 222000 },
+            { name: "Nagendra Bhattarai", imageUrl: "nagendra.jpg", deposit: 50000, loan: 247826 },
             { name: "Dipen Bhattarai", imageUrl: "dipen.jpg", deposit: 30000, loan: 306628 },
             { name: "Durga Bhattarai", imageUrl: "durga.jpg", deposit: 75000, loan: 179322 },
             { name: "Jiban Bhattarai", imageUrl: "jiban.jpg", deposit: 50000, loan: 177110 },
@@ -922,16 +1060,10 @@
             { name: "Bimal Bhattarai", imageUrl: "bimal.jpg", deposit: 50000, loan: 177110 },
             { name: "Chandra Mani Bhattarai", imageUrl: "chandra.jpg", deposit: 75000, loan: 242298 },
             { name: "Bharat Mohan Bhattarai", imageUrl: "bharat.jpg", deposit: 75000, loan: 177114 },
-            { name: "Parash Bhattarai", imageUrl: "paras.jpg", deposit: 30000, loan: 312176 },
-
-
-
-
-
-
+            { name: "Parash Bhattarai", imageUrl: "paras.jpg", deposit: 30000, loan: 312176 }
         ];
 
-        // Initial render
+        // Initial render (will show only names and photos)
         renderMembers();
         updateSummary();
     </script>
