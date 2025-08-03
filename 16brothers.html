@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16 Brothers Group </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .summary-card .amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .summary-card.loans .amount {
+            color: #e74c3c;
+        }
+
+        .summary-card.net .amount {
+            color: #3498db;
+        }
+
+        .add-member-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .add-member-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(39, 174, 96, 0.4);
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+
+        .member-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .member-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+        }
+
+        .member-image {
+           width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            
+            align-items: center;
+            justify-content: center;
+            color: white;
+           
+            
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .member-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .member-info {
+            padding: 25px;
+        }
+
+        .member-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .financial-info {
+            display: grid;
+            gap: 12px;
+        }
+
+        .financial-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .financial-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            margin-top: 8px;
+            padding-top: 15px;
+            border-top: 2px solid #3498db;
+        }
+
+        .financial-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .financial-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .deposit {
+            color: #27ae60;
+        }
+
+        .loan {
+            color: #e74c3c;
+        }
+
+        .net-total {
+            color: #3498db;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #e74c3c;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group input[type="file"] {
+            padding: 8px;
+            border: 2px dashed #e9ecef;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .form-group input[type="file"]:hover {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .table-container {
+            padding: 30px;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 15px;
+            border-right: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #dee2e6;
+            transition: background-color 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tfoot tr {
+            background: #f8f9fa;
+            border-top: 2px solid #3498db;
+            font-weight: bold;
+        }
+
+        .table-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .table-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .members-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .add-member-btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>16 Brothers </h1>
+            <p>Financial Overview </p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card deposits">
+                <h3>Total Deposits</h3>
+                <div class="amount" id="totalDeposits">Rs. 0.00</div>
+            </div>
+            <div class="summary-card loans">
+                <h3>Total Loans</h3>
+                <div class="amount" id="totalLoans">Rs. 0.00</div>
+            </div>
+            <div class="summary-card net">
+                <h3>Net Total</h3>
+                <div class="amount" id="netTotal">Rs. 0.00</div>
+            </div>
+            
+        </div>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button class="add-member-btn" id="addMemberBtn" onclick="openModal()" style="display: none;">+ Add New Brother</button>
+            <button class="add-member-btn" id="adminBtn" onclick="showAdminLogin()">Admin Access</button>
+            <button class="add-member-btn" id="lockBtn" onclick="lockAdmin()" style="display: none; background: linear-gradient(135deg, #e74c3c, #c0392b);">🔒 Lock Admin</button>
+            <button class="add-member-btn" id="saveBtn" onclick="saveData()" style="display: none; background: linear-gradient(135deg, #f39c12, #e67e22);">💾 Save Data</button>
+            <button class="add-member-btn" id="toggleViewBtn" onclick="toggleView()" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📊 Table View</button>
+        </div>
+
+        <!-- Card View -->
+        <div class="members-grid" id="membersGrid">
+            <!-- Member cards will be dynamically added here -->
+        </div>
+
+        <!-- Table View -->
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <div class="table-wrapper">
+                <div class="table-header">
+                    <h2>Brothers Overview Table</h2>
+                </div>
+                
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">#</th>
+                                <th style="text-align: center;">Photo</th>
+                                <th>Name</th>
+                                <th style="text-align: right; color: #27ae60;">Deposits (Rs.)</th>
+                                <th style="text-align: right; color: #e74c3c;">Loans (Rs.)</th>
+                                <th style="text-align: right; color: #3498db;">Net Total (Rs.)</th>
+                                <th id="actionsHeader" style="text-align: center; display: none;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Table rows will be dynamically added here -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="text-align: center;">Total</td>
+                                <td style="text-align: center;">👥</td>
+                                <td id="totalMembersTable">0 Brothers</td>
+                                <td style="text-align: right; color: #27ae60;" id="totalDepositsTable">Rs. 0.00</td>
+                                <td style="text-align: right; color: #e74c3c;" id="totalLoansTable">Rs. 0.00</td>
+                                <td style="text-align: right; color: #3498db; font-size: 1.1rem;" id="netTotalTable">Rs. 0.00</td>
+                                <td id="actionsFooter" style="display: none;"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminModal()">&times;</span>
+            <h2>Admin Access</h2>
+            <p style="color: #666; margin-bottom: 20px;">Enter admin code to enable editing:</p>
+            <form id="adminForm">
+                <div class="form-group">
+                    <label for="adminCode">Admin Code:</label>
+                    <input type="password" id="adminCode" required placeholder="Enter admin code">
+                </div>
+                <button type="submit" class="submit-btn">Unlock Admin Mode</button>
+            </form>
+            <div id="adminError" style="color: #e74c3c; margin-top: 10px; display: none;">
+                Incorrect admin code. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing members -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Add New Brother</h2>
+            <form id="memberForm">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="imageUrl">Profile Image URL (optional):</label>
+                    <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
+                    <small style="color: #666; font-size: 0.9rem; margin-top: 5px; display: block;">
+                        Or upload an image file:
+                    </small>
+                    <input type="file" id="imageFile" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="deposit">Deposit Amount (Rs.):</label>
+                    <input type="number" id="deposit" step="0.01" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="loan">Loan Amount (Rs.):</label>
+                    <input type="number" id="loan" step="0.01" min="0" value="0">
+                </div>
+                <button type="submit" class="submit-btn">Save Brother</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let members = [];
+        let editingIndex = -1;
+        let adminMode = false;
+        let currentView = 'cards'; // 'cards' or 'table'
+        const ADMIN_CODE = "Salim333";
+
+        function openModal(index = -1) {
+            if (!adminMode) {
+                alert('Admin access required to edit members.');
+                return;
+            }
+            
+            editingIndex = index;
+            const modal = document.getElementById('memberModal');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('memberForm');
+            
+            if (index >= 0) {
+                title.textContent = 'Edit Brother';
+                const member = members[index];
+                document.getElementById('name').value = member.name;
+                document.getElementById('imageUrl').value = member.imageUrl || '';
+                document.getElementById('deposit').value = member.deposit;
+                document.getElementById('loan').value = member.loan;
+                document.getElementById('imageFile').value = ''; // Clear file input
+            } else {
+                title.textContent = 'Add New Brother';
+                form.reset();
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('memberModal').style.display = 'none';
+            document.getElementById('imageFile').value = ''; // Clear file input
+            editingIndex = -1;
+        }
+
+        function deleteMember(index) {
+            if (!adminMode) {
+                alert('Admin access required to delete members.');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to remove this brother from the portfolio?')) {
+                members.splice(index, 1);
+                renderMembers();
+                updateSummary();
+            }
+        }
+
+        function showAdminLogin() {
+            document.getElementById('adminModal').style.display = 'block';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('adminCode').value = '';
+            document.getElementById('adminError').style.display = 'none';
+        }
+
+        function enableAdminMode() {
+            adminMode = true;
+            document.getElementById('addMemberBtn').style.display = 'inline-block';
+            document.getElementById('adminBtn').style.display = 'none';
+            document.getElementById('lockBtn').style.display = 'inline-block';
+            document.getElementById('saveBtn').style.display = 'inline-block';
+            
+            renderMembers(); // Re-render to show admin buttons
+            closeAdminModal();
+        }
+
+        function lockAdmin() {
+            adminMode = false;
+            document.getElementById('addMemberBtn').style.display = 'none';
+            document.getElementById('adminBtn').style.display = 'inline-block';
+            document.getElementById('lockBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'none';
+            
+            renderMembers(); // Re-render to hide admin buttons
+        }
+
+        function renderMembers() {
+            if (currentView === 'cards') {
+                renderCardsView();
+            } else {
+                renderTableView();
+            }
+        }
+
+        function renderCardsView() {
+            const grid = document.getElementById('membersGrid');
+            grid.innerHTML = '';
+
+            members.forEach((member, index) => {
+                const netTotal = member.deposit - member.loan;
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                
+                card.innerHTML = `
+                    <div class="member-image">
+                        ${member.imageUrl ? 
+                            `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\"font-size: 3rem; font-weight: bold;\">${member.name.charAt(0).toUpperCase()}</div>` :
+                            `<div style="font-size: 3rem; font-weight: bold;">${member.name.charAt(0).toUpperCase()}</div>`
+                        }
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">${member.name}</div>
+                        <div class="financial-info">
+                            <div class="financial-row">
+                                <span class="financial-label">Deposits:</span>
+                                <span class="financial-value deposit">Rs. ${member.deposit.toFixed(2)}</span>
+                            </div>
+                            <div class="financial-row">
+                                <span class="financial-label">Loans:</span>
+                                <span class="financial-value loan">Rs. ${member.loan.toFixed(2)}</span>
+                            </div>
+                            <div class="financial-row">
+                                <span class="financial-label">Net Total:</span>
+                                <span class="financial-value net-total">Rs. ${netTotal.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="actions" style="display: ${adminMode ? 'block' : 'none'};">
+                            <button class="edit-btn" onclick="openModal(${index})">Edit</button>
+                            <button class="delete-btn" onclick="deleteMember(${index})">Delete</button>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function renderTableView() {
+            const tableBody = document.getElementById('tableBody');
+            const actionsHeader = document.getElementById('actionsHeader');
+            const actionsFooter = document.getElementById('actionsFooter');
+            
+            // Show/hide actions column
+            actionsHeader.style.display = adminMode ? 'table-cell' : 'none';
+            actionsFooter.style.display = adminMode ? 'table-cell' : 'none';
+            
+            tableBody.innerHTML = '';
+
+            members.forEach((member, index) => {
+                const netTotal = member.deposit - member.loan;
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td style="text-align: center; font-weight: bold; color: #666;">${index + 1}</td>
+                    <td style="text-align: center;">
+                        <div class="table-image">
+                            ${member.imageUrl ? 
+                                `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='${member.name.charAt(0).toUpperCase()}` :
+                                member.name.charAt(0).toUpperCase()
+                            }
+                        </div>
+                    </td>
+                    <td style="font-weight: 500; color: #2c3e50;">${member.name}</td>
+                    <td style="text-align: right; color: #27ae60; font-weight: bold;">Rs. ${member.deposit.toFixed(2)}</td>
+                    <td style="text-align: right; color: #e74c3c; font-weight: bold;">Rs. ${member.loan.toFixed(2)}</td>
+                    <td style="text-align: right; color: ${netTotal >= 0 ? '#27ae60' : '#e74c3c'}; font-weight: bold;">Rs. ${netTotal.toFixed(2)}</td>
+                    <td style="text-align: center; display: ${adminMode ? 'table-cell' : 'none'};">
+                        <button class="edit-btn" onclick="openModal(${index})" style="margin-right: 5px; padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                        <button class="delete-btn" onclick="deleteMember(${index})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            updateTableSummary();
+        }
+
+        function updateTableSummary() {
+            const totalDeposits = members.reduce((sum, member) => sum + member.deposit, 0);
+            const totalLoans = members.reduce((sum, member) => sum + member.loan, 0);
+            const netTotal = totalDeposits - totalLoans;
+
+            document.getElementById('totalMembersTable').textContent = `${members.length} Brothers`;
+            document.getElementById('totalDepositsTable').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
+            document.getElementById('totalLoansTable').textContent = `Rs. ${totalLoans.toFixed(2)}`;
+            document.getElementById('netTotalTable').textContent = `Rs. ${netTotal.toFixed(2)}`;
+        }
+
+        function toggleView() {
+            const toggleBtn = document.getElementById('toggleViewBtn');
+            const membersGrid = document.getElementById('membersGrid');
+            const tableContainer = document.getElementById('tableContainer');
+
+            if (currentView === 'cards') {
+                currentView = 'table';
+                toggleBtn.textContent = '🎴 Card View';
+                membersGrid.style.display = 'none';
+                tableContainer.style.display = 'block';
+                renderTableView();
+            } else {
+                currentView = 'cards';
+                toggleBtn.textContent = '📊 Table View';
+                membersGrid.style.display = 'grid';
+                tableContainer.style.display = 'none';
+                renderCardsView();
+            }
+        }
+
+        function updateSummary() {
+            const totalDeposits = members.reduce((sum, member) => sum + member.deposit, 0);
+            const totalLoans = members.reduce((sum, member) => sum + member.loan, 0);
+            const netTotal = totalDeposits - totalLoans;
+
+            document.getElementById('totalDeposits').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
+            document.getElementById('totalLoans').textContent = `Rs. ${totalLoans.toFixed(2)}`;
+            document.getElementById('netTotal').textContent = `Rs. ${netTotal.toFixed(2)}`;
+            document.getElementById('memberCount').textContent = members.length;
+        }
+
+        function saveData() {
+            if (!adminMode) {
+                alert('Admin access required to save data.');
+                return;
+            }
+
+            const portfolioData = {
+                timestamp: new Date().toISOString(),
+                version: "1.0",
+                members: members,
+                summary: {
+                    totalDeposits: members.reduce((sum, member) => sum + member.deposit, 0),
+                    totalLoans: members.reduce((sum, member) => sum + member.loan, 0),
+                    memberCount: members.length
+                }
+            };
+
+            const dataStr = JSON.stringify(portfolioData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `brothers_portfolio_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Portfolio data saved successfully!');
+        }
+
+        // Helper function to convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Form submission with image handling
+        document.getElementById('memberForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!adminMode) {
+                alert('Admin access required to save members.');
+                return;
+            }
+            
+            let imageUrl = document.getElementById('imageUrl').value;
+            const imageFile = document.getElementById('imageFile').files[0];
+            
+            // If user uploaded a file, convert it to base64
+            if (imageFile) {
+                try {
+                    imageUrl = await fileToBase64(imageFile);
+                } catch (error) {
+                    alert('Error processing image file. Please try again.');
+                    return;
+                }
+            }
+            
+            const member = {
+                name: document.getElementById('name').value,
+                imageUrl: imageUrl,
+                deposit: parseFloat(document.getElementById('deposit').value) || 0,
+                loan: parseFloat(document.getElementById('loan').value) || 0
+            };
+
+            if (editingIndex >= 0) {
+                members[editingIndex] = member;
+            } else {
+                members.push(member);
+            }
+
+            renderMembers();
+            updateSummary();
+            closeModal();
+        });
+
+        // Admin form submission
+        document.getElementById('adminForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const enteredCode = document.getElementById('adminCode').value;
+            const errorDiv = document.getElementById('adminError');
+            
+            if (enteredCode === ADMIN_CODE) {
+                enableAdminMode();
+                errorDiv.style.display = 'none';
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('adminCode').value = '';
+            }
+        });
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const memberModal = document.getElementById('memberModal');
+            const adminModal = document.getElementById('adminModal');
+            
+            if (event.target === memberModal) {
+                closeModal();
+            }
+            if (event.target === adminModal) {
+                closeAdminModal();
+            }
+        }
+
+                members = [
+            { name: "Moti Bhattarai", imageUrl: "moti.jpg", deposit: 0, loan:355505  },
+            { name: "Anil Bhattarai", imageUrl: "anil.jpg", deposit: 75000, loan: 333340},
+            { name: "Laxman Bhattarai", imageUrl: "laxman.jpg", deposit: 30000, loan: 459841 },
+            { name: "Bal Krishna Bhattarai", imageUrl: "bal krishna.jpg", deposit: 50000, loan: 422365 },
+            { name: "Sujan Bhattarai", imageUrl: "sujan.jpg", deposit: 75000, loan: 495129 },
+            { name: "Tanka Bhattarai", imageUrl: "tanka.jpg", deposit: 30000, loan: 148800},
+            { name: "Dr.Nirajan Bhattarai", imageUrl: "nirajan.jpg", deposit: 75000, loan:222000  },
+            { name: "Nagendra Bhattarai", imageUrl: "nagendra.jpg", deposit: 50000, loan: 247826},
+            { name: "Dipen Bhattarai", imageUrl: "dipen.jpg", deposit: 30000, loan: 306628 },
+            { name: "Durga Bhattarai", imageUrl: "durga.jpg", deposit: 75000, loan: 179322 },
+            { name: "Jiban Bhattarai", imageUrl: "jiban.jpg", deposit: 50000, loan: 177110 },
+            { name: "Dipak Bhattarai", imageUrl: "dipak.jpg", deposit: 30000, loan: 177110 },
+            { name: "Bimal Bhattarai", imageUrl: "bimal.jpg", deposit: 50000, loan: 177110 },
+            { name: "Chandra Mani Bhattarai", imageUrl: "chandra.jpg", deposit: 75000, loan: 242298 },
+            { name: "Bharat Mohan Bhattarai", imageUrl: "bharat.jpg", deposit: 75000, loan: 177114 },
+            { name: "Parash Bhattarai", imageUrl: "paras.jpg", deposit: 30000, loan: 312176 },
+
+
+
+
+
+
+        ];
+
+        // Initial render
+        renderMembers();
+        updateSummary();
+    </script>
+</body>
+</html>
