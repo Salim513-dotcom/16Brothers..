@@ -411,12 +411,12 @@
             height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, #74b9ff, #0984e3);
-            display: flex;
+            
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
+           
+            
             margin: 0 auto;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -500,8 +500,8 @@
                         <thead>
                             <tr>
                                 <th style="text-align: center;">#</th>
-                                <th style="text-align: center;">Photo</th>
-                                <th>Name</th>
+                                <th style="text-align: center;"></th>
+                                <th style="text-align: center;">Name</th>
                                 <th style="text-align: right; color: #27ae60;">Deposits (Rs.)</th>
                                 <th style="text-align: right; color: #e74c3c;">Loans (Rs.)</th>
                                 <th style="text-align: right; color: #3498db;">Net Total (Rs.)</th>
@@ -739,9 +739,10 @@
                         </div>
                     </td>
                     <td style="font-weight: 500; color: #2c3e50;">${member.name}</td>
-                    <td style="text-align: right; color: #27ae60; font-weight: bold;">Rs. ${member.deposit.toFixed(2)}</td>
-                    <td style="text-align: right; color: #e74c3c; font-weight: bold;">Rs. ${member.loan.toFixed(2)}</td>
-                    <td style="text-align: right; color: ${netTotal >= 0 ? '#27ae60' : '#e74c3c'}; font-weight: bold;">Rs. ${netTotal.toFixed(2)}</td>
+                    <td style="font-weight: 500; color: #2c3e50;">${member.name}</td>
+                    <td style="text-align: right; color: #27ae60; font-weight: bold;">Rs. ${member.deposit}</td>
+                    <td style="text-align: right; color: #e74c3c; font-weight: bold;">Rs. ${member.loan}</td>
+                    <td style="text-align: right; color: ${netTotal >= 0 ? '#27ae60' : '#e74c3c'}; font-weight: bold;">Rs. ${netTotal}</td>
                     <td style="text-align: center; display: ${adminMode ? 'table-cell' : 'none'};">
                         <button class="edit-btn" onclick="openModal(${index})" style="margin-right: 5px; padding: 5px 10px; font-size: 0.8rem;">Edit</button>
                         <button class="delete-btn" onclick="deleteMember(${index})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
@@ -790,9 +791,9 @@
             const totalLoans = members.reduce((sum, member) => sum + member.loan, 0);
             const netTotal = totalDeposits - totalLoans;
 
-            document.getElementById('totalDeposits').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
-            document.getElementById('totalLoans').textContent = `Rs. ${totalLoans.toFixed(2)}`;
-            document.getElementById('netTotal').textContent = `Rs. ${netTotal.toFixed(2)}`;
+            document.getElementById('totalDeposits').textContent = `Rs. ${totalDeposits}`;
+            document.getElementById('totalLoans').textContent = `Rs. ${totalLoans}`;
+            document.getElementById('netTotal').textContent = `Rs. ${netTotal}`;
             document.getElementById('memberCount').textContent = members.length;
         }
 
