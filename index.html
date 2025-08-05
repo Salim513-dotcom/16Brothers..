@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>16 Brothers Group </title>
+    <title>16 Brothers Group</title>
     <style>
         * {
             margin: 0;
@@ -139,7 +139,7 @@
         }
 
         .member-image {
-           width: 280px;
+            width: 280px;
             height: 280px;
             border-radius: 50%;
             background: linear-gradient(135deg, #74b9ff, #0984e3);
@@ -445,6 +445,30 @@
             font-style: italic;
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #c3e6cb;
+        }
+
         @media (max-width: 768px) {
             .members-grid {
                 grid-template-columns: 1fr;
@@ -471,8 +495,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>16 Brothers </h1>
-            <p>Financial Overview </p>
+            <h1>16 Brothers</h1>
+            <p>Financial Overview</p>
         </div>
 
         <!-- Login Notice for non-logged in users -->
@@ -501,7 +525,6 @@
             <button class="add-member-btn" id="addMemberBtn" onclick="openModal()" style="display: none;">+ Add New Brother</button>
             <button class="add-member-btn" id="adminBtn" onclick="showAdminLogin()" style="display: none;">Admin Access</button>
             <button class="add-member-btn" id="lockBtn" onclick="lockAdmin()" style="display: none; background: linear-gradient(135deg, #e74c3c, #c0392b);">🔒 Lock Admin</button>
-            <button class="add-member-btn" id="saveBtn" onclick="saveData()" style="display: none; background: linear-gradient(135deg, #f39c12, #e67e22);">💾 Save Data</button>
             <button class="add-member-btn" id="toggleViewBtn" onclick="toggleView()" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">📊 Table View</button>
         </div>
 
@@ -620,10 +643,22 @@
                 </div>
                 <button type="submit" class="submit-btn">Save Brother</button>
             </form>
+            <div id="formMessage"></div>
         </div>
     </div>
 
     <script>
+        // Global error handler to catch and display errors
+        window.addEventListener('error', function(event) {
+            console.error('Uncaught error:', event.error);
+            showMessage('An error occurred: ' + event.error.message, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showMessage('Promise error: ' + event.reason, 'error');
+        });
+
         let members = [];
         let editingIndex = -1;
         let adminMode = false;
@@ -633,418 +668,666 @@
         const USER_ID = "Jaganath";
         const USER_PASSWORD = "9842660334";
 
+        // Cloud configuration (placeholder - not functional without proper setup)
+        let cloudEnabled = false;
+
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.getElementById('formMessage');
+            if (messageDiv) {
+                messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 5000);
+            } else {
+                // Fallback alert if form message div isn't available
+                console.log(`${type.toUpperCase()}: ${message}`);
+            }
+        }
+
+        function testConnection() {
+            try {
+                showMessage('Testing connection... (Demo mode - no real cloud connection)');
+                setTimeout(() => {
+                    showMessage('Connection test completed. Using local storage.');
+                }, 1000);
+            } catch (error) {
+                console.error('Connection test error:', error);
+                showMessage('Connection test failed: ' + error.message, 'error');
+            }
+        }
+
+        function loadFromCloud() {
+            try {
+                showMessage('Loading from cloud... (Demo mode)');
+                setTimeout(() => {
+                    showMessage('Demo data loaded successfully!');
+                    renderMembers();
+                    updateSummary();
+                }, 1000);
+            } catch (error) {
+                console.error('Load error:', error);
+                showMessage('Failed to load from cloud: ' + error.message, 'error');
+            }
+        }
+
         function showLogin() {
-            document.getElementById('loginModal').style.display = 'block';
+            try {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Show login error:', error);
+                showMessage('Error opening login modal', 'error');
+            }
         }
 
         function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-            document.getElementById('userId').value = '';
-            document.getElementById('userPassword').value = '';
-            document.getElementById('loginError').style.display = 'none';
+            try {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                
+                const userId = document.getElementById('userId');
+                const userPassword = document.getElementById('userPassword');
+                const loginError = document.getElementById('loginError');
+                
+                if (userId) userId.value = '';
+                if (userPassword) userPassword.value = '';
+                if (loginError) loginError.style.display = 'none';
+            } catch (error) {
+                console.error('Close login error:', error);
+            }
         }
 
         function login() {
-            userLoggedIn = true;
-            document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'inline-block';
-            document.getElementById('adminBtn').style.display = 'inline-block';
-            document.getElementById('loginNotice').style.display = 'none';
-            
-            renderMembers();
-            updateSummary();
-            closeLoginModal();
+            try {
+                userLoggedIn = true;
+                
+                const elements = {
+                    loginBtn: document.getElementById('loginBtn'),
+                    logoutBtn: document.getElementById('logoutBtn'),
+                    adminBtn: document.getElementById('adminBtn'),
+                    loginNotice: document.getElementById('loginNotice')
+                };
+
+                if (elements.loginBtn) elements.loginBtn.style.display = 'none';
+                if (elements.logoutBtn) elements.logoutBtn.style.display = 'inline-block';
+                if (elements.adminBtn) elements.adminBtn.style.display = 'inline-block';
+                if (elements.loginNotice) elements.loginNotice.style.display = 'none';
+                
+                renderMembers();
+                updateSummary();
+                closeLoginModal();
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Login error occurred', 'error');
+            }
         }
 
         function logout() {
-            userLoggedIn = false;
-            adminMode = false;
-            document.getElementById('loginBtn').style.display = 'inline-block';
-            document.getElementById('logoutBtn').style.display = 'none';
-            document.getElementById('adminBtn').style.display = 'none';
-            document.getElementById('addMemberBtn').style.display = 'none';
-            document.getElementById('lockBtn').style.display = 'none';
-            document.getElementById('saveBtn').style.display = 'none';
-            document.getElementById('loginNotice').style.display = 'block';
-            
-            renderMembers();
-            updateSummary();
+            try {
+                userLoggedIn = false;
+                adminMode = false;
+                
+                const elements = {
+                    loginBtn: document.getElementById('loginBtn'),
+                    logoutBtn: document.getElementById('logoutBtn'),
+                    adminBtn: document.getElementById('adminBtn'),
+                    addMemberBtn: document.getElementById('addMemberBtn'),
+                    lockBtn: document.getElementById('lockBtn'),
+                    loginNotice: document.getElementById('loginNotice')
+                };
+
+                if (elements.loginBtn) elements.loginBtn.style.display = 'inline-block';
+                if (elements.logoutBtn) elements.logoutBtn.style.display = 'none';
+                if (elements.adminBtn) elements.adminBtn.style.display = 'none';
+                if (elements.addMemberBtn) elements.addMemberBtn.style.display = 'none';
+                if (elements.lockBtn) elements.lockBtn.style.display = 'none';
+                if (elements.loginNotice) elements.loginNotice.style.display = 'block';
+                
+                renderMembers();
+                updateSummary();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
         }
 
         function openModal(index = -1) {
-            if (!adminMode) {
-                alert('Admin access required to edit members.');
-                return;
+            try {
+                if (!adminMode) {
+                    alert('Admin access required to edit members.');
+                    return;
+                }
+                
+                editingIndex = index;
+                const modal = document.getElementById('memberModal');
+                const title = document.getElementById('modalTitle');
+                const form = document.getElementById('memberForm');
+                
+                if (!modal || !title || !form) {
+                    throw new Error('Modal elements not found');
+                }
+                
+                if (index >= 0 && members[index]) {
+                    title.textContent = 'Edit Brother';
+                    const member = members[index];
+                    
+                    const elements = {
+                        name: document.getElementById('name'),
+                        imageUrl: document.getElementById('imageUrl'),
+                        deposit: document.getElementById('deposit'),
+                        loan: document.getElementById('loan'),
+                        imageFile: document.getElementById('imageFile')
+                    };
+
+                    if (elements.name) elements.name.value = member.name || '';
+                    if (elements.imageUrl) elements.imageUrl.value = member.imageUrl || '';
+                    if (elements.deposit) elements.deposit.value = member.deposit || 0;
+                    if (elements.loan) elements.loan.value = member.loan || 0;
+                    if (elements.imageFile) elements.imageFile.value = '';
+                } else {
+                    title.textContent = 'Add New Brother';
+                    form.reset();
+                }
+                
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Open modal error:', error);
+                showMessage('Error opening form: ' + error.message, 'error');
             }
-            
-            editingIndex = index;
-            const modal = document.getElementById('memberModal');
-            const title = document.getElementById('modalTitle');
-            const form = document.getElementById('memberForm');
-            
-            if (index >= 0) {
-                title.textContent = 'Edit Brother';
-                const member = members[index];
-                document.getElementById('name').value = member.name;
-                document.getElementById('imageUrl').value = member.imageUrl || '';
-                document.getElementById('deposit').value = member.deposit;
-                document.getElementById('loan').value = member.loan;
-                document.getElementById('imageFile').value = '';
-            } else {
-                title.textContent = 'Add New Brother';
-                form.reset();
-            }
-            
-            modal.style.display = 'block';
         }
 
         function closeModal() {
-            document.getElementById('memberModal').style.display = 'none';
-            document.getElementById('imageFile').value = '';
-            editingIndex = -1;
+            try {
+                const modal = document.getElementById('memberModal');
+                const imageFile = document.getElementById('imageFile');
+                const formMessage = document.getElementById('formMessage');
+                
+                if (modal) modal.style.display = 'none';
+                if (imageFile) imageFile.value = '';
+                if (formMessage) formMessage.innerHTML = '';
+                
+                editingIndex = -1;
+            } catch (error) {
+                console.error('Close modal error:', error);
+            }
         }
 
         function deleteMember(index) {
-            if (!adminMode) {
-                alert('Admin access required to delete members.');
-                return;
-            }
-            
-            if (confirm('Are you sure you want to remove this brother from the portfolio?')) {
-                members.splice(index, 1);
-                renderMembers();
-                updateSummary();
+            try {
+                if (!adminMode) {
+                    alert('Admin access required to delete members.');
+                    return;
+                }
+                
+                if (!members[index]) {
+                    showMessage('Member not found', 'error');
+                    return;
+                }
+                
+                if (confirm('Are you sure you want to remove this brother from the portfolio?')) {
+                    members.splice(index, 1);
+                    renderMembers();
+                    updateSummary();
+                    showMessage('Member deleted successfully!');
+                }
+            } catch (error) {
+                console.error('Delete member error:', error);
+                showMessage('Failed to delete member: ' + error.message, 'error');
             }
         }
 
         function showAdminLogin() {
-            document.getElementById('adminModal').style.display = 'block';
+            try {
+                const modal = document.getElementById('adminModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Show admin login error:', error);
+                showMessage('Error opening admin modal', 'error');
+            }
         }
 
         function closeAdminModal() {
-            document.getElementById('adminModal').style.display = 'none';
-            document.getElementById('adminCode').value = '';
-            document.getElementById('adminError').style.display = 'none';
+            try {
+                const modal = document.getElementById('adminModal');
+                const adminCode = document.getElementById('adminCode');
+                const adminError = document.getElementById('adminError');
+                
+                if (modal) modal.style.display = 'none';
+                if (adminCode) adminCode.value = '';
+                if (adminError) adminError.style.display = 'none';
+            } catch (error) {
+                console.error('Close admin modal error:', error);
+            }
         }
 
         function enableAdminMode() {
-            adminMode = true;
-            document.getElementById('addMemberBtn').style.display = 'inline-block';
-            document.getElementById('adminBtn').style.display = 'none';
-            document.getElementById('lockBtn').style.display = 'inline-block';
-            document.getElementById('saveBtn').style.display = 'inline-block';
-            
-            renderMembers();
-            closeAdminModal();
+            try {
+                adminMode = true;
+                
+                const elements = {
+                    addMemberBtn: document.getElementById('addMemberBtn'),
+                    adminBtn: document.getElementById('adminBtn'),
+                    lockBtn: document.getElementById('lockBtn')
+                };
+
+                if (elements.addMemberBtn) elements.addMemberBtn.style.display = 'inline-block';
+                if (elements.adminBtn) elements.adminBtn.style.display = 'none';
+                if (elements.lockBtn) elements.lockBtn.style.display = 'inline-block';
+                
+                renderMembers();
+                closeAdminModal();
+            } catch (error) {
+                console.error('Enable admin mode error:', error);
+                showMessage('Error enabling admin mode', 'error');
+            }
         }
 
         function lockAdmin() {
-            adminMode = false;
-            document.getElementById('addMemberBtn').style.display = 'none';
-            document.getElementById('adminBtn').style.display = 'inline-block';
-            document.getElementById('lockBtn').style.display = 'none';
-            document.getElementById('saveBtn').style.display = 'none';
-            
-            renderMembers();
+            try {
+                adminMode = false;
+                
+                const elements = {
+                    addMemberBtn: document.getElementById('addMemberBtn'),
+                    adminBtn: document.getElementById('adminBtn'),
+                    lockBtn: document.getElementById('lockBtn')
+                };
+
+                if (elements.addMemberBtn) elements.addMemberBtn.style.display = 'none';
+                if (elements.adminBtn) elements.adminBtn.style.display = 'inline-block';
+                if (elements.lockBtn) elements.lockBtn.style.display = 'none';
+                
+                renderMembers();
+            } catch (error) {
+                console.error('Lock admin error:', error);
+            }
         }
 
         function renderMembers() {
-            if (currentView === 'cards') {
-                renderCardsView();
-            } else {
-                renderTableView();
+            try {
+                if (currentView === 'cards') {
+                    renderCardsView();
+                } else {
+                    renderTableView();
+                }
+            } catch (error) {
+                console.error('Render members error:', error);
+                showMessage('Error rendering members: ' + error.message, 'error');
             }
         }
 
         function renderCardsView() {
-            const grid = document.getElementById('membersGrid');
-            grid.innerHTML = '';
+            try {
+                const grid = document.getElementById('membersGrid');
+                if (!grid) {
+                    throw new Error('Members grid element not found');
+                }
+                
+                grid.innerHTML = '';
 
-            members.forEach((member, index) => {
-                const netTotal = member.deposit - member.loan;
-                const card = document.createElement('div');
-                card.className = 'member-card';
-                
-                const financialContent = userLoggedIn ? `
-                    <div class="financial-row">
-                        <span class="financial-label">Deposits:</span>
-                        <span class="financial-value deposit">Rs. ${member.deposit.toFixed(2)}</span>
-                    </div>
-                    <div class="financial-row">
-                        <span class="financial-label">Loans:</span>
-                        <span class="financial-value loan">Rs. ${member.loan.toFixed(2)}</span>
-                    </div>
-                    <div class="financial-row">
-                        <span class="financial-label">Net Total:</span>
-                        <span class="financial-value net-total">Rs. ${netTotal.toFixed(2)}</span>
-                    </div>
-                ` : `
-                    <div class="financial-row">
-                        <span class="financial-label">Deposits:</span>
-                        <span class="financial-value hidden-financial">Login to view</span>
-                    </div>
-                    <div class="financial-row">
-                        <span class="financial-label">Loans:</span>
-                        <span class="financial-value hidden-financial">Login to view</span>
-                    </div>
-                    <div class="financial-row">
-                        <span class="financial-label">Net Total:</span>
-                        <span class="financial-value hidden-financial">Login to view</span>
-                    </div>
-                `;
-                
-                card.innerHTML = `
-                    <div class="member-image">
-                        ${member.imageUrl ? 
-                            `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='${member.name.charAt(0).toUpperCase()}'" />` :
-                            member.name.charAt(0).toUpperCase()
-                        }
-                    </div>
-                    <div class="member-info">
-                        <div class="member-name">${member.name}</div>
-                        <div class="financial-info">
-                            ${financialContent}
+                members.forEach((member, index) => {
+                    const netTotal = (member.deposit || 0) - (member.loan || 0);
+                    const card = document.createElement('div');
+                    card.className = 'member-card';
+                    
+                    const financialContent = userLoggedIn ? `
+                        <div class="financial-row">
+                            <span class="financial-label">Deposits:</span>
+                            <span class="financial-value deposit">Rs. ${(member.deposit || 0).toFixed(2)}</span>
                         </div>
-                        <div class="actions" style="display: ${adminMode ? 'block' : 'none'};">
-                            <button class="edit-btn" onclick="openModal(${index})">Edit</button>
-                            <button class="delete-btn" onclick="deleteMember(${index})">Delete</button>
+                        <div class="financial-row">
+                            <span class="financial-label">Loans:</span>
+                            <span class="financial-value loan">Rs. ${(member.loan || 0).toFixed(2)}</span>
                         </div>
-                    </div>
-                `;
-                
-                grid.appendChild(card);
-            });
+                        <div class="financial-row">
+                            <span class="financial-label">Net Total:</span>
+                            <span class="financial-value net-total">Rs. ${netTotal.toFixed(2)}</span>
+                        </div>
+                    ` : `
+                        <div class="financial-row">
+                            <span class="financial-label">Deposits:</span>
+                            <span class="financial-value hidden-financial">Login to view</span>
+                        </div>
+                        <div class="financial-row">
+                            <span class="financial-label">Loans:</span>
+                            <span class="financial-value hidden-financial">Login to view</span>
+                        </div>
+                        <div class="financial-row">
+                            <span class="financial-label">Net Total:</span>
+                            <span class="financial-value hidden-financial">Login to view</span>
+                        </div>
+                    `;
+                    
+                    const memberName = member.name || 'Unknown';
+                    const firstLetter = memberName.charAt(0).toUpperCase();
+                    
+                    card.innerHTML = `
+                        <div class="member-image">
+                            ${member.imageUrl ? 
+                                `<img src="${member.imageUrl}" alt="${memberName}" onerror="this.style.display='none'; this.parentNode.innerHTML='${firstLetter}'" />` :
+                                firstLetter
+                            }
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">${memberName}</div>
+                            <div class="financial-info">
+                                ${financialContent}
+                            </div>
+                            <div class="actions" style="display: ${adminMode ? 'block' : 'none'};">
+                                <button class="edit-btn" onclick="openModal(${index})">Edit</button>
+                                <button class="delete-btn" onclick="deleteMember(${index})">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Render cards view error:', error);
+                showMessage('Error rendering card view: ' + error.message, 'error');
+            }
         }
 
         function renderTableView() {
-            const tableBody = document.getElementById('tableBody');
-            const actionsHeader = document.getElementById('actionsHeader');
-            const actionsFooter = document.getElementById('actionsFooter');
-            
-            actionsHeader.style.display = adminMode ? 'table-cell' : 'none';
-            actionsFooter.style.display = adminMode ? 'table-cell' : 'none';
-            
-            tableBody.innerHTML = '';
+            try {
+                const tableBody = document.getElementById('tableBody');
+                const actionsHeader = document.getElementById('actionsHeader');
+                const actionsFooter = document.getElementById('actionsFooter');
+                
+                if (!tableBody) {
+                    throw new Error('Table body element not found');
+                }
+                
+                if (actionsHeader) actionsHeader.style.display = adminMode ? 'table-cell' : 'none';
+                if (actionsFooter) actionsFooter.style.display = adminMode ? 'table-cell' : 'none';
+                
+                tableBody.innerHTML = '';
 
-            members.forEach((member, index) => {
-                const netTotal = member.deposit - member.loan;
-                const row = document.createElement('tr');
-                
-                const depositsDisplay = userLoggedIn ? `Rs. ${member.deposit.toFixed(2)}` : 'Login required';
-                const loansDisplay = userLoggedIn ? `Rs. ${member.loan.toFixed(2)}` : 'Login required';
-                const netDisplay = userLoggedIn ? `Rs. ${netTotal.toFixed(2)}` : 'Login required';
-                
-                row.innerHTML = `
-                    <td style="text-align: center; font-weight: bold; color: #666;">${index + 1}</td>
-                    <td style="text-align: center;">
-                        <div class="table-image">
-                            ${member.imageUrl ? 
-                                `<img src="${member.imageUrl}" alt="${member.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='${member.name.charAt(0).toUpperCase()}'" />` :
-                                member.name.charAt(0).toUpperCase()
-                            }
-                        </div>
-                    </td>
-                    <td style="font-weight: 500; color: #2c3e50;">${member.name}</td>
-                    <td style="text-align: right; color: ${userLoggedIn ? '#27ae60' : '#999'}; font-weight: bold;">${depositsDisplay}</td>
-                    <td style="text-align: right; color: ${userLoggedIn ? '#e74c3c' : '#999'}; font-weight: bold;">${loansDisplay}</td>
-                    <td style="text-align: right; color: ${userLoggedIn ? (netTotal >= 0 ? '#27ae60' : '#e74c3c') : '#999'}; font-weight: bold;">${netDisplay}</td>
-                    <td style="text-align: center; display: ${adminMode ? 'table-cell' : 'none'};">
-                        <button class="edit-btn" onclick="openModal(${index})" style="margin-right: 5px; padding: 5px 10px; font-size: 0.8rem;">Edit</button>
-                        <button class="delete-btn" onclick="deleteMember(${index})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
+                members.forEach((member, index) => {
+                    const netTotal = (member.deposit || 0) - (member.loan || 0);
+                    const row = document.createElement('tr');
+                    
+                    const depositsDisplay = userLoggedIn ? `Rs. ${(member.deposit || 0).toFixed(2)}` : 'Login required';
+                    const loansDisplay = userLoggedIn ? `Rs. ${(member.loan || 0).toFixed(2)}` : 'Login required';
+                    const netDisplay = userLoggedIn ? `Rs. ${netTotal.toFixed(2)}` : 'Login required';
+                    
+                    const memberName = member.name || 'Unknown';
+                    const firstLetter = memberName.charAt(0).toUpperCase();
+                    
+                    row.innerHTML = `
+                        <td style="text-align: center; font-weight: bold; color: #666;">${index + 1}</td>
+                        <td style="text-align: center;">
+                            <div class="table-image">
+                                ${member.imageUrl ? 
+                                    `<img src="${member.imageUrl}" alt="${memberName}" onerror="this.style.display='none'; this.parentNode.innerHTML='${firstLetter}'" />` :
+                                    firstLetter
+                                }
+                            </div>
+                        </td>
+                        <td style="font-weight: 500; color: #2c3e50;">${memberName}</td>
+                        <td style="text-align: right; color: ${userLoggedIn ? '#27ae60' : '#999'}; font-weight: bold;">${depositsDisplay}</td>
+                        <td style="text-align: right; color: ${userLoggedIn ? '#e74c3c' : '#999'}; font-weight: bold;">${loansDisplay}</td>
+                        <td style="text-align: right; color: ${userLoggedIn ? (netTotal >= 0 ? '#27ae60' : '#e74c3c') : '#999'}; font-weight: bold;">${netDisplay}</td>
+                        <td style="text-align: center; display: ${adminMode ? 'table-cell' : 'none'};">
+                            <button class="edit-btn" onclick="openModal(${index})" style="margin-right: 5px; padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                            <button class="delete-btn" onclick="deleteMember(${index})" style="padding: 5px 10px; font-size: 0.8rem;">Delete</button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
 
-            updateTableSummary();
+                updateTableSummary();
+            } catch (error) {
+                console.error('Render table view error:', error);
+                showMessage('Error rendering table view: ' + error.message, 'error');
+            }
         }
 
         function updateTableSummary() {
-            const totalDeposits = members.reduce((sum, member) => sum + member.deposit, 0);
-            const totalLoans = members.reduce((sum, member) => sum + member.loan, 0);
-            const netTotal = totalDeposits - totalLoans;
+            try {
+                const totalDeposits = members.reduce((sum, member) => sum + (member.deposit || 0), 0);
+                const totalLoans = members.reduce((sum, member) => sum + (member.loan || 0), 0);
+                const netTotal = totalDeposits - totalLoans;
 
-            document.getElementById('totalMembersTable').textContent = `${members.length} Brothers`;
-            
-            if (userLoggedIn) {
-                document.getElementById('totalDepositsTable').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
-                document.getElementById('totalLoansTable').textContent = `Rs. ${totalLoans.toFixed(2)}`;
-                document.getElementById('netTotalTable').textContent = `Rs. ${netTotal.toFixed(2)}`;
-            } else {
-                document.getElementById('totalDepositsTable').textContent = 'Login Required';
-                document.getElementById('totalLoansTable').textContent = 'Login Required';
-                document.getElementById('netTotalTable').textContent = 'Login Required';
+                const elements = {
+                    totalMembersTable: document.getElementById('totalMembersTable'),
+                    totalDepositsTable: document.getElementById('totalDepositsTable'),
+                    totalLoansTable: document.getElementById('totalLoansTable'),
+                    netTotalTable: document.getElementById('netTotalTable')
+                };
+
+                if (elements.totalMembersTable) {
+                    elements.totalMembersTable.textContent = `${members.length} Brothers`;
+                }
+                
+                if (userLoggedIn) {
+                    if (elements.totalDepositsTable) elements.totalDepositsTable.textContent = `Rs. ${totalDeposits.toFixed(2)}`;
+                    if (elements.totalLoansTable) elements.totalLoansTable.textContent = `Rs. ${totalLoans.toFixed(2)}`;
+                    if (elements.netTotalTable) elements.netTotalTable.textContent = `Rs. ${netTotal.toFixed(2)}`;
+                } else {
+                    if (elements.totalDepositsTable) elements.totalDepositsTable.textContent = 'Login Required';
+                    if (elements.totalLoansTable) elements.totalLoansTable.textContent = 'Login Required';
+                    if (elements.netTotalTable) elements.netTotalTable.textContent = 'Login Required';
+                }
+            } catch (error) {
+                console.error('Update table summary error:', error);
             }
         }
 
         function toggleView() {
-            const toggleBtn = document.getElementById('toggleViewBtn');
-            const membersGrid = document.getElementById('membersGrid');
-            const tableContainer = document.getElementById('tableContainer');
+            try {
+                const toggleBtn = document.getElementById('toggleViewBtn');
+                const membersGrid = document.getElementById('membersGrid');
+                const tableContainer = document.getElementById('tableContainer');
 
-            if (currentView === 'cards') {
-                currentView = 'table';
-                toggleBtn.textContent = '🎴 Card View';
-                membersGrid.style.display = 'none';
-                tableContainer.style.display = 'block';
-                renderTableView();
-            } else {
-                currentView = 'cards';
-                toggleBtn.textContent = '📊 Table View';
-                membersGrid.style.display = 'grid';
-                tableContainer.style.display = 'none';
-                renderCardsView();
+                if (!toggleBtn || !membersGrid || !tableContainer) {
+                    throw new Error('Toggle view elements not found');
+                }
+
+                if (currentView === 'cards') {
+                    currentView = 'table';
+                    toggleBtn.textContent = '🎴 Card View';
+                    membersGrid.style.display = 'none';
+                    tableContainer.style.display = 'block';
+                    renderTableView();
+                } else {
+                    currentView = 'cards';
+                    toggleBtn.textContent = '📊 Table View';
+                    membersGrid.style.display = 'grid';
+                    tableContainer.style.display = 'none';
+                    renderCardsView();
+                }
+            } catch (error) {
+                console.error('Toggle view error:', error);
+                showMessage('Error toggling view: ' + error.message, 'error');
             }
         }
 
         function updateSummary() {
-            const totalDeposits = members.reduce((sum, member) => sum + member.deposit, 0);
-            const totalLoans = members.reduce((sum, member) => sum + member.loan, 0);
-            const netTotal = totalDeposits - totalLoans;
+            try {
+                const totalDeposits = members.reduce((sum, member) => sum + (member.deposit || 0), 0);
+                const totalLoans = members.reduce((sum, member) => sum + (member.loan || 0), 0);
+                const netTotal = totalDeposits - totalLoans;
 
-            if (userLoggedIn) {
-                document.getElementById('totalDeposits').textContent = `Rs. ${totalDeposits.toFixed(2)}`;
-                document.getElementById('totalLoans').textContent = `Rs. ${totalLoans.toFixed(2)}`;
-                document.getElementById('netTotal').textContent = `Rs. ${netTotal.toFixed(2)}`;
-            } else {
-                document.getElementById('totalDeposits').textContent = 'Login Required';
-                document.getElementById('totalLoans').textContent = 'Login Required';
-                document.getElementById('netTotal').textContent = 'Login Required';
-            }
-        }
+                const elements = {
+                    totalDeposits: document.getElementById('totalDeposits'),
+                    totalLoans: document.getElementById('totalLoans'),
+                    netTotal: document.getElementById('netTotal')
+                };
 
-        function saveData() {
-            if (!adminMode) {
-                alert('Admin access required to save data.');
-                return;
-            }
-
-            const portfolioData = {
-                timestamp: new Date().toISOString(),
-                version: "1.0",
-                members: members,
-                summary: {
-                    totalDeposits: members.reduce((sum, member) => sum + member.deposit, 0),
-                    totalLoans: members.reduce((sum, member) => sum + member.loan, 0),
-                    memberCount: members.length
+                if (userLoggedIn) {
+                    if (elements.totalDeposits) elements.totalDeposits.textContent = `Rs. ${totalDeposits.toFixed(2)}`;
+                    if (elements.totalLoans) elements.totalLoans.textContent = `Rs. ${totalLoans.toFixed(2)}`;
+                    if (elements.netTotal) elements.netTotal.textContent = `Rs. ${netTotal.toFixed(2)}`;
+                } else {
+                    if (elements.totalDeposits) elements.totalDeposits.textContent = 'Login Required';
+                    if (elements.totalLoans) elements.totalLoans.textContent = 'Login Required';
+                    if (elements.netTotal) elements.netTotal.textContent = 'Login Required';
                 }
-            };
-
-            const dataStr = JSON.stringify(portfolioData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `brothers_portfolio_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('Portfolio data saved successfully!');
+            } catch (error) {
+                console.error('Update summary error:', error);
+            }
         }
 
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // User login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const enteredId = document.getElementById('userId').value;
-            const enteredPassword = document.getElementById('userPassword').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            if (enteredId === USER_ID && enteredPassword === USER_PASSWORD) {
-                login();
-                errorDiv.style.display = 'none';
-            } else {
-                errorDiv.style.display = 'block';
-                document.getElementById('userId').value = '';
-                document.getElementById('userPassword').value = '';
-            }
-        });
-
-        // Form submission with image handling
-        document.getElementById('memberForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!adminMode) {
-                alert('Admin access required to save members.');
-                return;
-            }
-            
-            let imageUrl = document.getElementById('imageUrl').value;
-            const imageFile = document.getElementById('imageFile').files[0];
-            
-            if (imageFile) {
-                try {
-                    imageUrl = await fileToBase64(imageFile);
-                } catch (error) {
-                    alert('Error processing image file. Please try again.');
-                    return;
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // User login form submission
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        try {
+                            const enteredId = document.getElementById('userId')?.value;
+                            const enteredPassword = document.getElementById('userPassword')?.value;
+                            const errorDiv = document.getElementById('loginError');
+                            
+                            if (enteredId === USER_ID && enteredPassword === USER_PASSWORD) {
+                                login();
+                                if (errorDiv) errorDiv.style.display = 'none';
+                            } else {
+                                if (errorDiv) errorDiv.style.display = 'block';
+                                const userIdEl = document.getElementById('userId');
+                                const userPasswordEl = document.getElementById('userPassword');
+                                if (userIdEl) userIdEl.value = '';
+                                if (userPasswordEl) userPasswordEl.value = '';
+                            }
+                        } catch (error) {
+                            console.error('Login form error:', error);
+                            showMessage('Login error: ' + error.message, 'error');
+                        }
+                    });
                 }
-            }
-            
-            const member = {
-                name: document.getElementById('name').value,
-                imageUrl: imageUrl,
-                deposit: parseFloat(document.getElementById('deposit').value) || 0,
-                loan: parseFloat(document.getElementById('loan').value) || 0
-            };
 
-            if (editingIndex >= 0) {
-                members[editingIndex] = member;
-            } else {
-                members.push(member);
-            }
+                // Admin form submission
+                const adminForm = document.getElementById('adminForm');
+                if (adminForm) {
+                    adminForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        try {
+                            const enteredCode = document.getElementById('adminCode')?.value;
+                            const errorDiv = document.getElementById('adminError');
+                            
+                            if (enteredCode === ADMIN_CODE) {
+                                enableAdminMode();
+                                if (errorDiv) errorDiv.style.display = 'none';
+                            } else {
+                                if (errorDiv) errorDiv.style.display = 'block';
+                                const adminCodeEl = document.getElementById('adminCode');
+                                if (adminCodeEl) adminCodeEl.value = '';
+                            }
+                        } catch (error) {
+                            console.error('Admin form error:', error);
+                            showMessage('Admin login error: ' + error.message, 'error');
+                        }
+                    });
+                }
 
-            renderMembers();
-            updateSummary();
-            closeModal();
-        });
+                // Member form submission
+                const memberForm = document.getElementById('memberForm');
+                if (memberForm) {
+                    memberForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
 
-        // Admin form submission
-        document.getElementById('adminForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const enteredCode = document.getElementById('adminCode').value;
-            const errorDiv = document.getElementById('adminError');
-            
-            if (enteredCode === ADMIN_CODE) {
-                enableAdminMode();
-                errorDiv.style.display = 'none';
-            } else {
-                errorDiv.style.display = 'block';
-                document.getElementById('adminCode').value = '';
-            }
-        });
+                        try {
+                            if (!adminMode) {
+                                showMessage('Admin access required to save members.', 'error');
+                                return;
+                            }
 
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            const memberModal = document.getElementById('memberModal');
-            const adminModal = document.getElementById('adminModal');
-            const loginModal = document.getElementById('loginModal');
-            
-            if (event.target === memberModal) {
-                closeModal();
-            }
-            if (event.target === adminModal) {
-                closeAdminModal();
-            }
-            if (event.target === loginModal) {
-                closeLoginModal();
-            }
-        }
+                            const name = document.getElementById('name')?.value?.trim();
+                            const deposit = parseFloat(document.getElementById('deposit')?.value) || 0;
+                            const loan = parseFloat(document.getElementById('loan')?.value) || 0;
+                            const imageFile = document.getElementById('imageFile')?.files[0];
+                            const imageUrlInput = document.getElementById('imageUrl')?.value?.trim();
 
-        // Initialize members data
-        members = [
+                            if (!name) {
+                                showMessage('Name is required.', 'error');
+                                return;
+                            }
+
+                            showMessage('Saving member...', 'loading');
+                            
+                            let imageUrl = imageUrlInput;
+
+                            // Handle image file (convert to data URL for demo)
+                            if (imageFile) {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    imageUrl = e.target.result;
+                                    saveMemberData(name, deposit, loan, imageUrl);
+                                };
+                                reader.readAsDataURL(imageFile);
+                            } else {
+                                saveMemberData(name, deposit, loan, imageUrl);
+                            }
+
+                        } catch (error) {
+                            console.error('Member form error:', error);
+                            showMessage('Failed to save member: ' + error.message, 'error');
+                        }
+                    });
+                }
+
+                function saveMemberData(name, deposit, loan, imageUrl) {
+                    try {
+                        const memberData = {
+                            name: name,
+                            imageUrl: imageUrl || '',
+                            deposit: deposit,
+                            loan: loan
+                        };
+
+                        if (editingIndex >= 0) {
+                            // Update existing member
+                            members[editingIndex] = memberData;
+                            showMessage('Member updated successfully!');
+                        } else {
+                            // Add new member
+                            members.push(memberData);
+                            showMessage('New member added successfully!');
+                        }
+
+                        renderMembers();
+                        updateSummary();
+                        closeModal();
+
+                    } catch (error) {
+                        console.error('Save member data error:', error);
+                        showMessage('Failed to save member: ' + error.message, 'error');
+                    }
+                }
+
+                // Close modal when clicking outside of it
+                window.onclick = function(event) {
+                    try {
+                        const memberModal = document.getElementById('memberModal');
+                        const adminModal = document.getElementById('adminModal');
+                        const loginModal = document.getElementById('loginModal');
+                        
+                        if (event.target === memberModal) {
+                            closeModal();
+                        }
+                        if (event.target === adminModal) {
+                            closeAdminModal();
+                        }
+                        if (event.target === loginModal) {
+                            closeLoginModal();
+                        }
+                    } catch (error) {
+                        console.error('Window click error:', error);
+                    }
+                }
+
+                // Initialize with default members data
+                members = [
             { name: "Moti Bhattarai", imageUrl: "moti.jpg", deposit: 0, loan: 355505 },
             { name: "Anil Bhattarai", imageUrl: "anil.jpg", deposit: 75000, loan: 333340 },
             { name: "Laxman Bhattarai", imageUrl: "laxman.jpg", deposit: 30000, loan: 459841 },
@@ -1061,11 +1344,18 @@
             { name: "Chandra Mani Bhattarai", imageUrl: "chandra.jpg", deposit: 75000, loan: 242298 },
             { name: "Bharat Mohan Bhattarai", imageUrl: "bharat.jpg", deposit: 75000, loan: 177114 },
             { name: "Parash Bhattarai", imageUrl: "paras.jpg", deposit: 30000, loan: 312176 }
-        ];
+                ];
 
-        // Initial render (will show only names and photos)
-        renderMembers();
-        updateSummary();
+                // Initial render (will show only names and photos)
+                renderMembers();
+                updateSummary();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showMessage('Application initialization error: ' + error.message, 'error');
+            }
+        });
+
     </script>
 </body>
 </html>
