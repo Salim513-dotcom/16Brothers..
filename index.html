@@ -1463,5 +1463,52 @@
     });
 </script>
 
+
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script>
+<script>
+  const client = new Appwrite.Client()
+    .setEndpoint("https://nyc.cloud.appwrite.io/v1")
+    .setProject("6891fd99000b184f5bf3");
+
+  const databases = new Appwrite.Databases(client);
+  const databaseId = "6891fe0b003b4042234c";
+  const collectionId = "6891fe2c0020ef16dd1f";
+
+  async function addMemberToAppwrite() {
+    const name = document.getElementById("name").value.trim();
+    const imageUrl = document.getElementById("image").value.trim();
+    const deposit = parseInt(document.getElementById("deposit").value.trim());
+    const loan = parseInt(document.getElementById("loan").value.trim());
+
+    const statusEl = document.getElementById("appwrite-status");
+    if (!name || !imageUrl || isNaN(deposit) || isNaN(loan)) {
+      statusEl.textContent = "❌ Please fill all fields properly.";
+      statusEl.style.color = "red";
+      return;
+    }
+
+    try {
+      await databases.createDocument(databaseId, collectionId, 'unique()', {
+        name, imageUrl, deposit, loan
+      });
+      statusEl.textContent = `✅ Member "${name}" saved to Appwrite!`;
+      statusEl.style.color = "green";
+
+      document.getElementById("name").value = "";
+      document.getElementById("image").value = "";
+      document.getElementById("deposit").value = "";
+      document.getElementById("loan").value = "";
+
+      // Optionally refresh members
+      if (typeof loadMembersFromAppwrite === "function") loadMembersFromAppwrite();
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = `❌ Failed to save: ${err.message}`;
+      statusEl.style.color = "red";
+    }
+  }
+</script>
+<div id="appwrite-status" style="font-family:sans-serif;margin-top:10px;font-weight:bold;"></div>
+
 </body>
 </html>
