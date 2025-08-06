@@ -1357,5 +1357,57 @@
         });
 
     </script>
+
+<!-- Appwrite SDK and setup -->
+<script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script>
+<script>
+    const client = new Appwrite.Client();
+    client
+        .setEndpoint("https://nyc.cloud.appwrite.io/v1")
+        .setProject("6891fd99000b184f5bf3");
+
+    const databases = new Appwrite.Databases(client);
+
+    function loadMembersFromAppwrite() {
+        databases.listDocuments("6891fe0b003b4042234c", "6891fe2c0020ef16dd1f")
+            .then(response => {
+                members = response.documents;
+                renderMembers();
+                updateSummary();
+            })
+            .catch(error => {
+                console.error("Appwrite Load Error:", error);
+                showMessage("Failed to load from Appwrite: " + error.message, "error");
+            });
+    }
+
+    function saveMemberData(name, deposit, loan, imageUrl) {
+        const memberData = {
+            name,
+            deposit,
+            loan,
+            imageUrl: imageUrl || ''
+        };
+
+        const documentId = 'unique()';
+
+        databases.createDocument("6891fe0b003b4042234c", "6891fe2c0020ef16dd1f", documentId, memberData)
+            .then(() => {
+                showMessage('Member saved to Appwrite!');
+                loadMembersFromAppwrite();
+                closeModal();
+            })
+            .catch((error) => {
+                console.error("Appwrite Save Error:", error);
+                showMessage("Failed to save to Appwrite: " + error.message, "error");
+            });
+    }
+
+    // Load data on startup
+    document.addEventListener("DOMContentLoaded", () => {
+        loadMembersFromAppwrite();
+    });
+</script>
+
 </body>
 </html>
