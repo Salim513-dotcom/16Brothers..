@@ -1409,5 +1409,61 @@
     });
 </script>
 
+
+<!-- DEBUGGING ENHANCEMENTS -->
+<script>
+    console.log("✅ Appwrite SDK Loaded:", typeof Appwrite !== "undefined");
+
+    client
+        .setEndpoint("https://nyc.cloud.appwrite.io/v1")
+        .setProject("6891fd99000b184f5bf3");
+
+    console.log("📡 Appwrite Client Configured");
+
+    const databases = new Appwrite.Databases(client);
+
+    function loadMembersFromAppwrite() {
+        console.log("📥 Attempting to load members from Appwrite...");
+        databases.listDocuments("6891fe0b003b4042234c", "6891fe2c0020ef16dd1f")
+            .then(response => {
+                console.log("✅ Data loaded from Appwrite:", response);
+                members = response.documents;
+                renderMembers();
+                updateSummary();
+            })
+            .catch(error => {
+                console.error("❌ Failed to load from Appwrite:", error);
+                showMessage("Failed to load from Appwrite: " + error.message, "error");
+            });
+    }
+
+    function saveMemberData(name, deposit, loan, imageUrl) {
+        console.log("📤 Saving member to Appwrite...");
+        const memberData = {
+            name,
+            deposit,
+            loan,
+            imageUrl: imageUrl || ''
+        };
+
+        databases.createDocument("6891fe0b003b4042234c", "6891fe2c0020ef16dd1f", 'unique()', memberData)
+            .then(() => {
+                console.log("✅ Member saved to Appwrite");
+                showMessage('Member saved to Appwrite!');
+                loadMembersFromAppwrite();
+                closeModal();
+            })
+            .catch((error) => {
+                console.error("❌ Save to Appwrite failed:", error);
+                showMessage("Failed to save to Appwrite: " + error.message, "error");
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("📄 DOM loaded — initializing Appwrite fetch...");
+        loadMembersFromAppwrite();
+    });
+</script>
+
 </body>
 </html>
